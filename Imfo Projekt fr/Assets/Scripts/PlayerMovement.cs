@@ -1,54 +1,35 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-
 
 public class PlayerController : MonoBehaviour
 {
+    public float speed = 8f;
+    public float jumpForce = 16f;
+    public Transform groundCheck;
+    public LayerMask groundLayer;
 
+    private Rigidbody2D rb;
+    private bool isGrounded;
     private float horizontal;
-    private float speed = 8f;
-    private float jumpingPower = 32f;
-    private bool isFacingRight = true;
 
-    [SerializeField] private Rigidbody2D rb;
-    [SerializeField] private Transform groundCheck;
-    [SerializeField] private LayerMask groundLayer;
-   void Update()
-   {
-       horizontal = Input.GetAxisRaw("Horizontal");
+    private void Awake()
+    {
+        rb = GetComponent<Rigidbody2D>();
+    }
 
-       if (Input.GetButtonDown("Jump") && IsGrounded())
-       {
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpingPower);
-       }
+    private void Update()
+    {
+        horizontal = Input.GetAxisRaw("Horizontal");
 
-       if (Input.GetButtonDown("Jump") && rb.linearVelocity.y > 0f)
-       {
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * 0.5f);
-       }
+        isGrounded = Physics2D.OverlapCircle(groundCheck.position, 0.2f, groundLayer);
 
-       Flip();
-   }
-
-   private void FixedUpdate()
-   {
-        rb.linearVelocity = new Vector2(horizontal * speed, rb.linearVelocity.y);
-   }
-
-   private bool IsGrounded()
-   {
-        return Physics2D.OverlapCircle(groundCheck.position, 0.2f, groundLayer);
-   }
-
-   private void Flip()
-   {
-        if (isFacingRight && horizontal < 0f || !isFacingRight && horizontal > 0f)
+        if (Input.GetButtonDown("Jump") && isGrounded)
         {
-            isFacingRight = !isFacingRight;
-            Vector3 localScale = transform.localScale;
-            localScale.x *= -1f;
-            transform.localScale = localScale;
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
         }
-   }
+    }
+
+    private void FixedUpdate()
+    {
+        rb.linearVelocity = new Vector2(horizontal * speed, rb.linearVelocity.y);
+    }
 }
