@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using UnityEngine.Events;
 
 public class PlayerController : MonoBehaviour
 {
@@ -10,7 +10,9 @@ public class PlayerController : MonoBehaviour
     private float speed = 8f;
     private float jumpingPower = 32f;
     private bool isFacingRight = true;
-     Animator animator;
+    public Animator animator;
+    private bool wasGrounded;
+ 
 
     [SerializeField] private Rigidbody2D rb;
     [SerializeField] private Transform groundCheck;
@@ -19,9 +21,12 @@ public class PlayerController : MonoBehaviour
      {
           horizontal = Input.GetAxisRaw("Horizontal");
 
+          bool isGrounded = IsGrounded();
+
           if (Input.GetButtonDown("Jump") && IsGrounded())
           {
                rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpingPower);
+               animator.SetBool("isJumping", true);
           }
 
           if (Input.GetButtonDown("Jump") && rb.linearVelocity.y > 0f)
@@ -29,13 +34,24 @@ public class PlayerController : MonoBehaviour
                rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * 0.5f);
           }
 
+          if (!wasGrounded && isGrounded)
+          {
+               animator.SetBool("isJumping", false);
+          }
+
+          wasGrounded = isGrounded;
+
           Flip();
+
+          animator.SetFloat("Speed", Mathf.Abs(horizontal));
+     
    }
+
 
      private void FixedUpdate()
      {
           rb.linearVelocity = new Vector2(horizontal * speed, rb.linearVelocity.y);
-   }
+     }
 
    private bool IsGrounded()
    {
